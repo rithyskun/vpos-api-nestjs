@@ -1,15 +1,18 @@
-import { User } from 'src/users/entities/user.entity';
-import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
+import { DataSource, DataSourceOptions } from 'typeorm';
 
-const database: PostgresConnectionOptions = {
+//npm run migration:generate --name=MigrationName
+export const dataSourceOptions: DataSourceOptions = {
   type: 'postgres',
   host: '127.0.0.1',
   port: 5432,
-  username: process.env.DATABASE_USER,
-  password: process.env.DATABASE_PASSWORD,
-  database: process.env.DATABASE_NAME,
-  entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-  synchronize: true,
+  username: 'postgres',
+  password: 'postgres',
+  database: 'postgres',
+  synchronize: false,
+  entities: ['dist/**/*.entity.{js,ts}'],
+  migrations: ['dist/db/migrations/*.{js,ts}'],
 };
 
-export default database;
+const dataSource = new DataSource(dataSourceOptions);
+
+export default dataSource;

@@ -80,6 +80,8 @@ export class UsersController {
   }
 
   @Delete(':id')
+  @ApiOkResponse()
+  @ApiNotFoundResponse()
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.remove(id);
   }

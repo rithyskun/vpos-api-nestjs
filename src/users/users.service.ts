@@ -1,9 +1,14 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -17,11 +22,11 @@ export class UsersService {
     const emailExist = await this.findByEmail(email);
 
     if (emailExist) {
-      throw new HttpException(
-        'The user email ' + email + ' already exists',
-        HttpStatus.CONFLICT,
-      );
+      throw new ConflictException();
     }
+    const salt = await bcrypt.genSalt(7);
+    const hash = bcrypt.hashSync(createUserDto.password, salt);
+    createUserDto.password = hash;
     return this.userRepository.save(createUserDto);
   }
 
@@ -37,7 +42,7 @@ export class UsersService {
     return users;
   }
 
-  async findByEmail(email: string): Promise<User> {
+  async findByEmail(email: string): Promise<User | undefined> {
     return this.userRepository.findOne({
       where: {
         email: email,
@@ -52,26 +57,22 @@ export class UsersService {
       },
     });
     if (!user || user === null) {
-      throw new HttpException(
-        {
-          status: HttpStatus.NOT_FOUND,
-          error: 'Not found',
-        },
-        HttpStatus.NOT_FOUND,
-      );
+      throw new NotFoundException();
     }
     return user;
   }
 
-  async update(userId: number, updateUserDto: UpdateUserDto): Promise<any> {
+  async update(userId: number, updateUserDto: UpdateUserDto): Promise<User> {
     const user = await this.findOne(userId);
 
     if (!user) return;
-
-    return await this.userRepository.update({ id: userId }, updateUserDto);
+    return await this.userRepository.save(Object.assign(user, updateUserDto));
   }
 
   async remove(userId: number): Promise<void> {
+    const user = await this.findOne(userId);
+
+    if (!user) return;
     await this.userRepository.delete({ id: userId });
   }
 }
