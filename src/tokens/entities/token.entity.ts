@@ -1,5 +1,11 @@
 import { User } from 'src/users/entities/user.entity';
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 
 export enum tokenType {
   Bearer,
@@ -13,9 +19,6 @@ export class Token {
   @Column()
   token: string;
 
-  @Column({ type: 'enum', enum: tokenType })
-  type: tokenType.Bearer;
-
   @Column()
   expired: boolean;
 
@@ -23,11 +26,15 @@ export class Token {
   revoked: boolean;
 
   @Column()
-  ipAddress: string;
+  ipAddress?: string;
 
   @Column()
   createdAt: Date;
 
-  @ManyToOne(() => User, (user) => user.id)
-  user: User;
+  @Column()
+  userId: number;
+
+  @ManyToOne(() => User, (user) => user.token)
+  @JoinColumn([{ name: 'userId', referencedColumnName: 'id' }])
+  user: User[];
 }

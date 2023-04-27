@@ -11,7 +11,15 @@ export class TokensService {
     private tokenRepository: Repository<Token>,
   ) {}
 
-  async createToken(createTokenDto: CreateTokenDto): Promise<Token> {
+  async save(createTokenDto: CreateTokenDto): Promise<Token> {
     return this.tokenRepository.save(createTokenDto);
+  }
+
+  async findOne(userId: number) {
+    return this.tokenRepository.findOne({
+      where: {
+        userId: userId,
+      },
+    });
   }
 }

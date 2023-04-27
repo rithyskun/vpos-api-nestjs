@@ -1,13 +1,16 @@
-import { IsBoolean, IsDate, IsEnum, IsNumber, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsDate,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { tokenType } from '../entities/token.entity';
-import { User } from 'src/users/entities/user.entity';
 
 export class CreateTokenDto {
   @IsString()
   token: string;
-
-  @IsEnum(tokenType)
-  type: tokenType;
 
   @IsBoolean()
   expired: boolean;
@@ -16,11 +19,12 @@ export class CreateTokenDto {
   revoked: boolean;
 
   @IsString()
+  @IsOptional()
   ipAddress?: string;
 
   @IsDate()
-  createdAt: Date;
+  createdAt?: Date;
 
   @IsNumber()
-  user: User;
+  userId: number;
 }

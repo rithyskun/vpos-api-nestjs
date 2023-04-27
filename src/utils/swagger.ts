@@ -22,5 +22,9 @@ export function SwaggerDocs(app: any) {
     SwaggerOptions,
   );
 
-  SwaggerModule.setup('/api/v1/docs', app, document);
+  SwaggerModule.setup('docs', app, document, {
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+  });
 }

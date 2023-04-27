@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Exclude } from 'class-transformer';
-
+import { Token } from 'src/tokens/entities/token.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
@@ -31,6 +31,9 @@ export class User {
   @ApiProperty()
   @Column()
   roles: string;
+
+  @OneToMany(() => Token, (token) => token.user)
+  token: Token;
 
   constructor(partial: Partial<User>) {
     Object.assign(this, partial);

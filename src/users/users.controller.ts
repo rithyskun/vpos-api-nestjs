@@ -10,6 +10,7 @@ import {
   Query,
   UseInterceptors,
   ClassSerializerInterceptor,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -25,13 +26,18 @@ import {
   ApiQuery,
   ApiResponse,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { User } from './entities/user.entity';
+import { Throttle } from '@nestjs/throttler';
+import { AuthGuard } from '@nestjs/passport';
 
+@UseGuards(AuthGuard('jwt'))
 @ApiBearerAuth()
 @ApiTags('users')
 @Controller('/api/v1/users')
 @UseInterceptors(ClassSerializerInterceptor)
+@Throttle(2, 10)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -52,6 +58,7 @@ export class UsersController {
     description: 'Query with email or first name',
   })
   @ApiOkResponse({ type: User, isArray: true })
+  @ApiUnauthorizedResponse()
   findAll(@Query('query') query: string) {
     return this.usersService.findAll(query);
   }
@@ -64,6 +71,7 @@ export class UsersController {
   })
   @ApiNotFoundResponse()
   @ApiBadRequestResponse()
+  @ApiUnauthorizedResponse()
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.findOne(id);
   }
@@ -72,6 +80,7 @@ export class UsersController {
   @ApiOkResponse({ type: User })
   @ApiNotFoundResponse()
   @ApiBadRequestResponse()
+  @ApiUnauthorizedResponse()
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateUserDto: UpdateUserDto,
@@ -82,6 +91,7 @@ export class UsersController {
   @Delete(':id')
   @ApiOkResponse()
   @ApiNotFoundResponse()
+  @ApiUnauthorizedResponse()
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.remove(id);
   }
