@@ -10,7 +10,6 @@ import {
   Query,
   UseInterceptors,
   ClassSerializerInterceptor,
-  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -29,15 +28,13 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { User } from './entities/user.entity';
-import { Throttle } from '@nestjs/throttler';
-import { AuthGuard } from '@nestjs/passport';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 
-@UseGuards(AuthGuard('jwt'))
+// @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 @ApiTags('users')
-@Controller('/api/v1/users')
+@Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
-@Throttle(2, 10)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 

@@ -9,8 +9,8 @@ import * as basicAuth from 'express-basic-auth';
 const port = parseInt(process.env.PORT);
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { cors: true });
-
+  const app = await NestFactory.create(AppModule);
+  app.setGlobalPrefix('api/v1');
   app.use(
     '/docs',
     basicAuth({
@@ -19,13 +19,16 @@ async function bootstrap() {
       realm: 'API Docs',
     }),
   );
-
   SwaggerDocs(app);
-  app.enableCors();
   app.use(compression());
-  app.use(cookieParser('trynestjsla'));
+  app.use(cookieParser());
+  app.enableCors({
+    credentials: true,
+    origin: true,
+  });
   app.use(helmet());
   app.useGlobalPipes(new ValidationPipe());
+
   await app.listen(port, async () => {
     console.log(`Server is running on '${await app.getUrl()}'`);
   });

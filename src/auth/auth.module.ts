@@ -8,6 +8,7 @@ import { AccessTokenStrategy } from './strategies/accessToken.strategy';
 import { RefreshTokenStrategy } from './strategies/refreshToken.strategy';
 import { TokensModule } from '../tokens/tokens.module';
 import { MagicLinkStrategy } from './strategies/magicLink.strategy';
+import { LocalStrategy } from './strategies/local.strategy';
 
 @Module({
   imports: [UsersModule, PassportModule, JwtModule.register({}), TokensModule],
@@ -16,6 +17,7 @@ import { MagicLinkStrategy } from './strategies/magicLink.strategy';
     AccessTokenStrategy,
     RefreshTokenStrategy,
     MagicLinkStrategy,
+    LocalStrategy,
   ],
   controllers: [AuthController],
   exports: [AuthService],

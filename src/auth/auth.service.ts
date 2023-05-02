@@ -1,8 +1,6 @@
 import {
   BadRequestException,
-  ForbiddenException,
   Injectable,
-  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
@@ -11,7 +9,7 @@ import { User } from '../users/entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { TokensService } from '../tokens/tokens.service';
-import { CreateTokenDto } from '../tokens/dto/create-token.dto';
+import { CreateTokenDto } from 'src/tokens/dto/create-token.dto';
 
 export interface UserDto {
   body: {
@@ -57,16 +55,16 @@ export class AuthService {
     const token = await this.generateToken(user.id, user.email);
 
     //TODO: save the token into DB
-    // const data: CreateTokenDto = {
-    //   token: token.refreshToken,
-    //   expired: false,
-    //   revoked: false,
-    //   ipAddress: userDto.ip,
-    //   createdAt: new Date(),
-    //   userId: user.id,
-    // };
+    const data: CreateTokenDto = {
+      token: token.refreshToken,
+      expired: false,
+      revoked: false,
+      ipAddress: userDto.ip,
+      createdAt: new Date(),
+      userId: user.id,
+    };
 
-    // await this.tokenService.save(data);
+    await this.tokenService.save(data);
 
     return token;
   }
@@ -80,23 +78,18 @@ export class AuthService {
     return null;
   }
 
-  async refreshTokens(userId: number, refreshToken: string) {
+  async reIssueAccessToken(refreshToken: string) {
     //Check if user exist
-    const user = await this.usersService.findOne(userId);
-
-    if (!user) throw new ForbiddenException();
-
-    // Check if refresh token match
-    // const decoded = this.jwtService.decode(refreshToken);
-
-    const isValid = await this.verifyJwtToken(
+    const { decoded } = await this.verifyJwtToken(
       refreshToken,
       'JWT_REFRESH_SECRET',
     );
 
-    console.log(isValid);
+    if (!decoded) return null;
 
-    return isValid;
+    const accessToken = await this.generateToken(decoded.sub, decoded.email);
+
+    return accessToken;
   }
 
   async verifyJwtToken(
@@ -105,7 +98,6 @@ export class AuthService {
   ) {
     const publicKey = Buffer.from(this.configService.get<string>(keyName));
 
-    console.log(publicKey);
     try {
       const decoded = await this.jwtService.verifyAsync(token, {
         secret: publicKey,
@@ -118,7 +110,7 @@ export class AuthService {
     } catch (error) {
       return {
         valid: false,
-        expired: error.message || 'JWT Expired',
+        expired: true,
         decoded: null,
       };
     }
