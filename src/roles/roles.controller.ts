@@ -7,17 +7,20 @@ import {
   Param,
   Delete,
   ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import { RolesService } from './roles.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiConflictResponse,
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiQuery,
   ApiResponse,
   ApiTags,
   ApiUnauthorizedResponse,
@@ -36,16 +39,22 @@ export class RolesController {
   @ApiUnauthorizedResponse()
   @ApiNotFoundResponse()
   @ApiConflictResponse()
+  @ApiBadRequestResponse()
   create(@Body() createRoleDto: CreateRoleDto) {
     return this.rolesService.create(createRoleDto);
   }
 
   @Get()
-  @ApiOkResponse()
+  @ApiQuery({
+    name: 'query',
+    required: false,
+    description: 'query with roleName',
+  })
+  @ApiOkResponse({ isArray: true })
   @ApiForbiddenResponse()
   @ApiUnauthorizedResponse()
-  findAll() {
-    return this.rolesService.findAll();
+  findAll(@Query('query') query: string) {
+    return this.rolesService.findAll(query);
   }
 
   @Get(':id')

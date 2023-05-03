@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -17,24 +16,34 @@ export class RolesService {
   ) {}
   async create(createRoleDto: CreateRoleDto): Promise<Role> {
     const isExistRole = await this.findByRoleName(createRoleDto.roleName);
-    if (isExistRole) throw new ConflictException();
+    if (isExistRole) {
+      throw new ConflictException();
+    }
     return this.roleRepository.save(createRoleDto);
   }
 
   async findByRoleName(role: string): Promise<Role> {
-    return this.roleRepository.findOneOrFail({
+    return this.roleRepository.findOne({
       where: {
         roleName: role,
       },
     });
   }
 
-  async findAll(): Promise<Role[]> {
-    return this.roleRepository.find();
+  async findAll(query?: string): Promise<Role[]> {
+    const roles = await this.roleRepository.find();
+    if (query) {
+      return roles.filter((r) =>
+        r.roleName.toLowerCase().includes(query.toLowerCase()),
+      );
+    }
+    return roles;
   }
 
   async findOne(id: number): Promise<Role> {
-    return this.roleRepository.findOne({ where: { id: id } });
+    const role = await this.roleRepository.findOne({ where: { id: id } });
+    if (!role) throw new NotFoundException();
+    return role;
   }
 
   async update(id: number, updateRoleDto: UpdateRoleDto): Promise<Role> {

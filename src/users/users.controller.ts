@@ -28,7 +28,6 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { User } from './entities/user.entity';
-import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 
 // @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
