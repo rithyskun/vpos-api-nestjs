@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import * as compression from 'compression';
 import * as cookieParser from 'cookie-parser';
@@ -7,6 +7,7 @@ import helmet from 'helmet';
 import { SwaggerDocs } from './utils/swagger';
 import * as basicAuth from 'express-basic-auth';
 const port = parseInt(process.env.PORT);
+const logger = new Logger();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -30,7 +31,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
 
   await app.listen(port, async () => {
-    console.log(`Server is running on '${await app.getUrl()}'`);
+    logger.log(`Server is running on '${await app.getUrl()}'`);
   });
 }
 bootstrap();
