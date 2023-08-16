@@ -1,10 +1,14 @@
-export function formatDateTime(d: Date) {
-  return new Date(d).toLocaleDateString('en', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: 'numeric',
-  });
+export class AppUtils {
+  constructor() { }
+
+  static formatDateTime(d: Date) {
+    return new Date(d).toLocaleDateString('en', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: 'numeric',
+    });
+  }
 }

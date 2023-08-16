@@ -1,10 +1,19 @@
 {
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true,
-    "source.addMissingImports": true
+    "source.addMissingImports": true,
   },
-  //  add this line for you file type, prettier save, not eslint save
   "[typescript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+      "editor.defaultFormatter": "vscode.typescript-language-features",
+  },
+  "prettier.enable": true,
+  "editor.formatOnSave": true,
+  "cSpell.words": [
+    "NATS",
+    "REDHATAMQ",
+    "REDISAMQ",
+    "nvarchar",
+    "pathmazing",
+    "typeorm"
+  ]
 }

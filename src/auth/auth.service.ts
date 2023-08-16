@@ -11,11 +11,11 @@ import { ConfigService } from '@nestjs/config';
 import { TokensService } from '../tokens/tokens.service';
 import { CreateTokenDto } from 'src/tokens/dto/create-token.dto';
 
+import * as D from './dto';
+
 export interface UserDto {
-  body: {
-    email: string;
-    password: string;
-  };
+  email: string;
+  password: string;
   ip: string;
 }
 @Injectable()
@@ -25,57 +25,47 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
     private tokenService: TokensService,
-  ) {}
+  ) { }
 
-  async validateUser(email: string, passwd: string): Promise<User> {
-    const user = await this.usersService.findByEmail(email);
-    const validPassword = await bcrypt.compare(passwd, user.password);
-
-    if (user && validPassword) {
-      return user;
-    }
-    throw new UnauthorizedException();
+  async register(userId: number, email: string): Promise<any> {
+    const newToken = await this.generateToken(userId, email);
+    return newToken;
   }
 
-  async validateEmail(email: string) {
-    const user = await this.usersService.findByEmail(email);
-
-    if (!user) throw new UnauthorizedException();
-
-    return user;
-  }
-
-  async signIn(userDto: UserDto) {
-    const { email, password } = userDto.body;
+  async signIn(body: D.SignInRequestDto): Promise<D.SignInResponseDto> {
+    const { email, password } = body;
 
     if (!email || !password)
       throw new BadRequestException('Invalid email and password');
     const user = await this.validateUser(email, password);
 
-    const token = await this.generateToken(user.id, user.email);
-
     //TODO: save the token into DB
-    const data: CreateTokenDto = {
-      token: token.refreshToken,
-      expired: false,
-      revoked: false,
-      ipAddress: userDto.ip,
-      createdAt: new Date(),
-      userId: user.id,
-    };
+    // const data: CreateTokenDto = {
+    //   token: token.refreshToken,
+    //   expired: false,
+    //   revoked: false,
+    //   ipAddress: body.ip,
+    //   createdAt: new Date(),
+    //   userId: user.id,
+    // };
 
-    await this.tokenService.save(data);
-
-    return token;
+    // await this.tokenService.save(data);
+    return await this.generateToken(user.id, user.email);
   }
 
-  async signup(userId: number, email: string) {
-    const newToken = await this.generateToken(userId, email);
-    return newToken;
+  async signup(body: D.SignUpRequestDto): Promise<D.RegisterResponseDto> {
+    const data = await this.usersService.create(body);
+    return {
+      firstName: data.firstName,
+      lastName: data.lastName,
+      email: data.email,
+      status: data.status,
+      roles: data.roles
+    }
   }
 
   async logout() {
-    return null;
+    return 'Logout';
   }
 
   async reIssueAccessToken(refreshToken: string) {
@@ -116,7 +106,7 @@ export class AuthService {
     }
   }
 
-  async generateToken(userId: number, email: string) {
+  async generateToken(userId: number, email: string): Promise<D.SignInResponseDto> {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(
         {
@@ -144,5 +134,24 @@ export class AuthService {
       accessToken,
       refreshToken,
     };
+  }
+  async validateUser(email: string, passwd: string): Promise<User> {
+    const user = await this.usersService.findByEmail(email);
+    const validPassword = await bcrypt.compare(passwd, user.password);
+
+    if (!user) throw new BadRequestException('USER.DOES.NOT.EXIST')
+
+    if (user && validPassword) {
+      return user;
+    }
+    throw new UnauthorizedException();
+  }
+
+  async validateEmail(email: string) {
+    const user = await this.usersService.findByEmail(email);
+
+    if (!user) throw new UnauthorizedException();
+
+    return user;
   }
 }

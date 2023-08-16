@@ -3,11 +3,11 @@ import { DataSource, DataSourceOptions } from 'typeorm';
 //npm run migration:generate --name=MigrationName
 export const dataSourceOptions: DataSourceOptions = {
   type: 'postgres',
-  host: '127.0.0.1',
+  host: process.env.DATABASE_HOST,
   port: 5432,
   username: 'postgres',
-  password: 'postgres',
-  database: 'postgres',
+  password: 'root123',
+  database: 'pos',
   synchronize: false,
   entities: ['dist/**/*.entity.{js,ts}'],
   migrations: ['dist/src/db/migrations/*.{js,ts}'],

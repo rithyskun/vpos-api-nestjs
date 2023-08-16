@@ -9,7 +9,7 @@ import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class AuthMiddleware implements NestMiddleware {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) { }
   async use(req: Request, res: Response, next: NextFunction) {
     const accessToken = this.extractTokenFromHeader(req);
     const refreshToken = req.cookies['refreshToken'];

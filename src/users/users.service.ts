@@ -9,25 +9,26 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
+import { AppUtils } from 'src/utils/appUtils';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
-  ) {}
+  ) { }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const { email } = createUserDto;
     const emailExist = await this.findByEmail(email);
 
     if (emailExist) {
-      throw new ConflictException();
+      throw new ConflictException('EMAIL.ALREADY.EXIST');
     }
     const salt = await bcrypt.genSalt(7);
     const hash = bcrypt.hashSync(createUserDto.password, salt);
     createUserDto.password = hash;
-    return this.userRepository.save(createUserDto);
+    return await this.userRepository.save(createUserDto);
   }
 
   async findAll(query?: string): Promise<User[]> {
@@ -43,7 +44,7 @@ export class UsersService {
   }
 
   async findByEmail(email: string): Promise<User | undefined> {
-    return this.userRepository.findOne({
+    return await this.userRepository.findOne({
       where: {
         email: email,
       },
@@ -65,8 +66,8 @@ export class UsersService {
   async update(userId: number, updateUserDto: UpdateUserDto): Promise<User> {
     const user = await this.findOne(userId);
 
-    if (!user) return;
-    return await this.userRepository.save(Object.assign(user, updateUserDto));
+    if (!user)
+      return await this.userRepository.save(Object.assign({ user, ...updateUserDto }));
   }
 
   async remove(userId: number): Promise<void> {

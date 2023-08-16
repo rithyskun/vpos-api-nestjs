@@ -8,21 +8,20 @@ import {
   Body,
   ValidationPipe,
 } from '@nestjs/common';
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import { AuthService } from './auth.service';
 import {
   ApiBadRequestResponse,
   ApiBody,
+  ApiConflictResponse,
   ApiCreatedResponse,
   ApiExcludeEndpoint,
   ApiForbiddenResponse,
-  ApiInternalServerErrorResponse,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { LoginDto } from './dto/login.dto';
+import * as D from './dto'
 import { MagicLinkStrategy } from './strategies/magicLink.strategy';
-import { SignupDto } from './dto/signup.dto';
 import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('login')
@@ -31,24 +30,16 @@ export class AuthController {
   constructor(
     private authService: AuthService,
     private strategy: MagicLinkStrategy,
-  ) {}
+  ) { }
 
-  @ApiBody({ type: LoginDto })
+  @ApiBody({ type: D.SignInRequestDto })
   @ApiCreatedResponse()
   @ApiForbiddenResponse()
   @ApiBadRequestResponse()
   @ApiUnauthorizedResponse()
-  @ApiInternalServerErrorResponse()
   @Post('login')
-  async login(@Req() req, @Res() res: Response) {
-    const authToken = await this.authService.signIn(req);
-    res.cookie('refreshToken', authToken.refreshToken, {
-      httpOnly: true,
-      sameSite: 'strict',
-      maxAge: 604800000,
-    });
-    return res.send({ accessToken: authToken.accessToken });
-    // return this.authService.signIn(req);
+  async login(@Body() body: D.SignInRequestDto): Promise<D.SignInResponseDto> {
+    return await this.authService.signIn(body);
   }
 
   @UseGuards(AuthGuard('jwt-refresh'))
@@ -71,19 +62,31 @@ export class AuthController {
   }
 
   @Post('signup')
-  async signup(
-    @Req() req,
-    @Res() res,
-    @Body(new ValidationPipe()) body: SignupDto, // As ValidationPipe was declare as global, we also can remove it here.
-  ) {
-    await this.authService.validateEmail(body.destination);
+  async signup(@Body() body: D.SignUpRequestDto): Promise<D.RegisterResponseDto> {
+    return await this.authService.signup(body);
+  }
+
+  @Post('register')
+  @ApiBody({ type: D.RegisterRegisterDto })
+  @ApiCreatedResponse()
+  @ApiForbiddenResponse()
+  @ApiBadRequestResponse()
+  @ApiUnauthorizedResponse()
+  @ApiConflictResponse()
+  async register(@Req() req: Request,
+    @Res() res: Response,
+    @Body(new ValidationPipe()) body: D.RegisterRegisterDto): Promise<void> {
+
+    const { destination } = body;
+    // await this.authService.validateEmail(destination);
     return this.strategy.send(req, res);
   }
 
   @UseGuards(AuthGuard('magic-link'))
-  @Get('signup/callback')
+  @ApiBody({ type: D.MagicLinkRequestDto })
+  @Get('register/callback')
   async callback(@Req() req) {
     //TODO: generate the jwt token access
-    return this.authService.signup(req.user.id, req.user.email);
+    return this.authService.register(req.user.id, req.user.email);
   }
 }
