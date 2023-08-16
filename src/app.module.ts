@@ -8,7 +8,7 @@ import { DataSource } from 'typeorm';
 import { AuthModule } from './auth/auth.module';
 import { TokensModule } from './tokens/tokens.module';
 import { dataSourceOptions } from './config/database.config';
-import { AuthMiddleware } from './auth/common/middleware/auth.middleware';
+import { AuthMiddleware } from './auth/middleware/auth.middleware';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { LoggingInterceptor } from './auth/interceptors/logger.interceptor';
 import { RolesModule } from './roles/roles.module';
@@ -50,5 +50,5 @@ export class AppModule implements NestModule {
       .exclude('auth/(.*)', 'health')
       .forRoutes('*');
   }
-  constructor(private dataSource: DataSource) {}
+  constructor(private dataSource: DataSource) { }
 }
