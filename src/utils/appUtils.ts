@@ -1,3 +1,4 @@
+
 export class AppUtils {
   constructor() { }
 
@@ -11,4 +12,22 @@ export class AppUtils {
       second: 'numeric',
     });
   }
+
+  static omit = <T extends object, U extends keyof T>(
+    item: T,
+    ...keys: U[]
+  ): {
+      [K in Exclude<keyof T, U>]: T[K];
+    } => {
+    const ret = {} as T;
+
+    let key: keyof T;
+    for (key in item) {
+      if (!keys.includes(key as U)) {
+        ret[key] = item[key];
+      }
+    }
+
+    return ret;
+  };
 }

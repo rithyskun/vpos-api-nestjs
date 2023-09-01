@@ -37,13 +37,6 @@ export class AuthMiddleware implements NestMiddleware {
         throw new UnauthorizedException('Token expired');
       }
 
-      res.setHeader('x-access-token', token.accessToken);
-      res.cookie('refreshToken', token.refreshToken, {
-        httpOnly: true,
-        sameSite: 'strict',
-        maxAge: 604800000,
-      });
-
       const newToken = await this.authService.verifyJwtToken(
         token.accessToken,
         'JWT_ACCESS_SECRET',
