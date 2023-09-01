@@ -10,7 +10,7 @@ import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { TokensService } from '../tokens/tokens.service';
 import { CreateTokenDto } from 'src/tokens/dto/create-token.dto';
-
+import { AppUtils } from 'src/utils/appUtils';
 import * as D from './dto';
 
 export interface UserDto {
@@ -53,15 +53,8 @@ export class AuthService {
     return await this.generateToken(user.id, user.email);
   }
 
-  async signup(body: D.SignUpRequestDto): Promise<D.RegisterResponseDto> {
-    const data = await this.usersService.create(body);
-    return {
-      firstName: data.firstName,
-      lastName: data.lastName,
-      email: data.email,
-      status: data.status,
-      roles: data.roles
-    }
+  async signup(body: D.SignUpRequestDto): Promise<User> {
+    return await this.usersService.create(body);
   }
 
   async logout() {

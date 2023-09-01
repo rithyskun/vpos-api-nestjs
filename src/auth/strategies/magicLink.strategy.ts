@@ -16,7 +16,7 @@ export class MagicLinkStrategy extends PassportStrategy(
       jwtOptions: {
         expiresIn: '15m',
       },
-      callbackUrl: 'http://localhost:8000/api/v1/auth/register/callback',
+      callbackUrl: `${configService.get<string>('HOST')}:${configService.get<string>('PORT')}/${configService.get<string>('VERSION')}/auth/register/callback`,
       sendMagicLink: async (destination, href) => {
         //TODO: send email
         this.logger.debug(
@@ -25,7 +25,6 @@ export class MagicLinkStrategy extends PassportStrategy(
       },
       verify: (payload, callback) => {
         // Get or create a user with the provided email from the database
-        console.log(payload);
         callback(null, this.validate(payload));
       },
     });

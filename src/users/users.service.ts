@@ -3,13 +3,13 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import * as D from './dto'
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { AppUtils } from 'src/utils/appUtils';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -18,17 +18,17 @@ export class UsersService {
     private userRepository: Repository<User>,
   ) { }
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
-    const { email } = createUserDto;
+  async create(body: D.CreateUserDto): Promise<any> {
+    const { email } = body;
     const emailExist = await this.findByEmail(email);
 
     if (emailExist) {
       throw new ConflictException('EMAIL.ALREADY.EXIST');
     }
     const salt = await bcrypt.genSalt(7);
-    const hash = bcrypt.hashSync(createUserDto.password, salt);
-    createUserDto.password = hash;
-    return await this.userRepository.save(createUserDto);
+    const hash = bcrypt.hashSync(body.password, salt);
+    body.password = hash;
+    return await this.userRepository.save(body);
   }
 
   async findAll(query?: string): Promise<User[]> {

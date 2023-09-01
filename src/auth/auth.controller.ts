@@ -77,7 +77,7 @@ export class AuthController {
     @Res() res: Response,
     @Body(new ValidationPipe()) body: D.RegisterRegisterDto): Promise<void> {
 
-    const { destination } = body;
+    // const { destination } = body;
     // await this.authService.validateEmail(destination);
     return this.strategy.send(req, res);
   }
@@ -85,8 +85,9 @@ export class AuthController {
   @UseGuards(AuthGuard('magic-link'))
   @ApiBody({ type: D.MagicLinkRequestDto })
   @Get('register/callback')
-  async callback(@Req() req) {
+  async callback(@Req() req): Promise<void> {
     //TODO: generate the jwt token access
-    return this.authService.register(req.user.id, req.user.email);
+    console.log(req.user.id)
+    return await this.authService.register(req.user.id, req.user.email);
   }
 }

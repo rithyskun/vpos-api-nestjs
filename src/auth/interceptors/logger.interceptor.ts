@@ -13,17 +13,16 @@ import { UsersService } from 'src/users/users.service';
 export class LoggingInterceptor implements NestInterceptor {
   private readonly logger = new Logger(LoggingInterceptor.name);
 
-  constructor(private readonly userService: UsersService) {}
+  constructor(private readonly userService: UsersService) { }
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
     const userAgent = request.get('user-agent') || '';
-    const { ip, method, path: url } = request;
+    const { ip, body, method, path: url } = request;
 
     this.logger.log(
-      `${method} ${url} ${userAgent} ${ip}: ${context.getClass().name} ${
-        context.getHandler().name
-      } invoked...`,
+      `${method} ${url} ${userAgent} ${ip}: ${context.getClass().name} ${context.getHandler().name
+      } invoked... \nRequest Body: ${JSON.stringify(body, null, 4)}`,
     );
     this.logger.debug('userId:', ip);
 
@@ -33,15 +32,14 @@ export class LoggingInterceptor implements NestInterceptor {
         const response = context.switchToHttp().getResponse();
 
         const { statusCode } = response;
-        const contentLength = response.get('content-length');
+        const contentLength = response.get('content-type');
 
         this.logger.log(
-          `${method} ${url} ${statusCode} ${contentLength} - ${userAgent} ${ip}: ${
-            Date.now() - now
+          `${method} ${url} ${statusCode} ${contentLength} - ${userAgent} ${ip}: ${Date.now() - now
           }ms`,
         );
 
-        this.logger.debug('Response:', res);
+        this.logger.debug(`\nResponse Body: ${JSON.stringify(res, null, 4)}`);
       }),
       catchError((err) => {
         this.logger.error(err);

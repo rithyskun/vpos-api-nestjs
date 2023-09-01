@@ -10,10 +10,12 @@ import {
   Query,
   UseInterceptors,
   ClassSerializerInterceptor,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import * as D from './dto';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -28,14 +30,15 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { User } from './entities/user.entity';
+import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 
-// @UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 @ApiTags('users')
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) { }
 
   @Post()
   @ApiOperation({ summary: 'Create User' })
@@ -43,7 +46,7 @@ export class UsersController {
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   @ApiConflictResponse()
   @ApiBadRequestResponse({ description: 'Bad request' })
-  create(@Body() createUserDto: CreateUserDto) {
+  async create(@Body() createUserDto: CreateUserDto): Promise<D.CreateUserDto> {
     return this.usersService.create(createUserDto);
   }
 

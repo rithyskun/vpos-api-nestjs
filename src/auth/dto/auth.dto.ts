@@ -81,3 +81,7 @@ export class MagicLinkRequestDto {
   @IsNotEmpty()
   baseUrl: string;
 }
+
+export class SignUpResponseDto extends RegisterResponseDto {
+
+}
